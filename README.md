@@ -4,6 +4,7 @@ This project is a modular Docker setup with separated folders for the database(M
 
 ## Project Structure
 
+```
 project-root/
 │
 ├── app-backend/                        # Laravel
@@ -20,7 +21,7 @@ project-root/
 │   └── docker-compose.yml
 │
 ├── README.md
-
+```
 
 ## Quick Start
 
