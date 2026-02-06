@@ -1,56 +1,36 @@
-FROM php:8.2-fpm-alpine
+# Use official PHP image with Apache
+FROM php:8.2-fpm
 
-ARG UID
-ARG GID
-
-ENV UID=${UID}
-ENV GID=${GID}
-
-RUN mkdir -p /var/www/html
-
+# Set working directory
 WORKDIR /var/www/html
 
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# MacOS staff group's gid is 20, so is the dialout group in alpine linux. We're not using it, let's just remove it.
-RUN delgroup dialout
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN addgroup -g ${GID} --system laravel
-RUN adduser -G laravel --system -D -s /bin/sh -u ${UID} laravel
+# Copy application files
+COPY /app/api /var/www/html
 
-RUN sed -i "s/user = www-data/user = laravel/g" /usr/local/etc/php-fpm.d/www.conf
-RUN sed -i "s/group = www-data/group = laravel/g" /usr/local/etc/php-fpm.d/www.conf
-RUN echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/www.conf
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-RUN docker-php-ext-install pdo pdo_mysql
-RUN apk add --no-cache libzip-dev \
-    && docker-php-ext-install zip
-RUN apk --update --no-cache add \
-        libpng \
-        libjpeg-turbo \
-        freetype \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev \
-    && docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-    && docker-php-ext-install gd \
-    && apk del \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
 
-RUN mkdir -p /usr/src/php/ext/redis \
-    && curl -L https://github.com/phpredis/phpredis/archive/5.3.4.tar.gz | tar xvz -C /usr/src/php/ext/redis --strip 1 \
-    && echo 'redis' >> /usr/src/php-available-exts \
-    && docker-php-ext-install redis
-    
-# RUN ["chmod", "+x", "/var/www/html/entrypoint.sh"]
-ENTRYPOINT ["sh","/var/www/html/entrypoint.sh"]
-
-USER laravel
-
-
-CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
+CMD ["php-fpm"]
