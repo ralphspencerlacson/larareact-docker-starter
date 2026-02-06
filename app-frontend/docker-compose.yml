@@ -14,10 +14,10 @@ services:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
     volumes:
-      - ./app/react:/var/www/html:delegated
+      - ./app/react:/app
     ports:
       - 30003:5173
     restart: unless-stopped
     networks:
       app-database_app-network:
-        ipv4_address: 172.30.0.24
+        ipv4_address: 172.10.0.24

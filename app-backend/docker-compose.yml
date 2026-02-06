@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
     networks:
       app-database_app-network:
-        ipv4_address: 172.30.0.22
+        ipv4_address: 172.10.0.22
 
   web-server:
     container_name: app-nginx-server
@@ -38,4 +38,4 @@ services:
     restart: unless-stopped
     networks:
       app-database_app-network:
-        ipv4_address: 172.30.0.23
+        ipv4_address: 172.10.0.23
