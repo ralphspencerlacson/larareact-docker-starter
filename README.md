@@ -1,3 +1,7 @@
+
+<img width="1536" height="1024" alt="laravel-react-docker" src="https://github.com/user-attachments/assets/470e6117-1fec-457e-88c4-f5f674ae4e94" />
+
+
 # Dockerized Laravel + Frontend + MySQL Setup
 
 This project is a modular Docker setup with separated folders for the database(MySQL/phpMyAdmin), backend (Laravel), and frontend (React/Vite).
